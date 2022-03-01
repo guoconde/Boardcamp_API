@@ -7,6 +7,7 @@ export async function allCategories(req, res) {
         const { rows: arrCategories } = await connection.query(`
             SELECT * FROM categories
         `)
+
         res.send(arrCategories)
 
     } catch (error) {
@@ -24,7 +25,7 @@ export async function newCategory(req, res) {
             SELECT * FROM categories WHERE name = ( $1 )
         `, [ name ])
 
-        if(category.rows.length > 0) res.sendStatus(409)
+        if(category.rows.length > 0) return res.sendStatus(409)
 
         await connection.query(`
             INSERT INTO categories ( name ) VALUES ( $1 )
