@@ -21,11 +21,11 @@ export async function newCustomer(req, res) {
 
     try {
 
-        const customer = await connection.query(`
+        const { rows: customer} = await connection.query(`
             SELECT * FROM customers WHERE cpf = ( $1 )
         `, [cpf])
 
-        if(customer.rows.length > 0) return res.sendStatus(409)
+        if(customer.length > 0) return res.sendStatus(409)
 
         await connection.query(`
             INSERT INTO customers ( name, phone, cpf, birthday ) VALUES ( $1, $2, $3, $4 )
@@ -35,7 +35,7 @@ export async function newCustomer(req, res) {
         
     } catch (error) {
         console.error(error)
-        res.status(500).send(error.message)
+        res.status(500).send('Erro inesperado')
     }
 
 }

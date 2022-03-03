@@ -17,14 +17,22 @@ export async function allGames(req, res) {
 }
 
 export async function newGame(req, res) {
-    const { name, image, stockTotal, categoryId, pricePerDay } = req.body
+    let { name, image, stockTotal, categoryId, pricePerDay } = req.body
+
+    pricePerDay = pricePerDay * 100
+    stockTotal = parseInt(stockTotal)
 
     try {
-        const game = await connection.query(`
+        const { rows: game } = await connection.query(`
             SELECT * FROM games WHERE name = ( $1 )
         `, [name])
 
-        if (game.rows.length > 0) return res.sendStatus(409)
+        const { rows: category } = await connection.query(`
+            SELECT * FROM categories WHERE id = ( $1 )
+        `, [categoryId])
+
+        if(category.length === 0) return res.sendStatus(400)
+        if (game.length > 0) return res.sendStatus(409)
 
         await connection.query(`
             INSERT INTO games ( name, image, "stockTotal", "categoryId", "pricePerDay" ) VALUES ( $1, $2, $3, $4, $5 )
