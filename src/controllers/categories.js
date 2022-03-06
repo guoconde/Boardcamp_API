@@ -1,4 +1,5 @@
 import connection from '../db.js'
+import catchError from '../error/catchError.js'
 
 export async function allCategories(req, res) {
 
@@ -11,8 +12,7 @@ export async function allCategories(req, res) {
         res.send(arrCategories)
 
     } catch (error) {
-        console.error(error)
-        res.sendStatus(500)
+        catchError(res. error)
     }
 }
 
@@ -34,7 +34,6 @@ export async function newCategory(req, res) {
         res.sendStatus(201)
 
     } catch (error) {
-        console.error(error)
-        res.sendStatus(500)
+        catchError(res, error)
     }
 }

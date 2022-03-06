@@ -1,5 +1,6 @@
 import connection from "../db.js"
 import dayjs from "dayjs"
+import catchError from "../error/catchError.js"
 
 export async function allRentals(req, res) {
 
@@ -12,8 +13,7 @@ export async function allRentals(req, res) {
         res.send(arrRentals)
         
     } catch (error) {
-        console.error(error)
-        res.sendStatus(500)
+        catchError(res, error)
     }
 }
 
@@ -41,7 +41,6 @@ export async function newRental(req, res) {
         res.sendStatus(201)
 
     } catch (error) {
-        console.error(error)
-        res.sendStatus(500)
+        catchError(res, error)
     }
 }

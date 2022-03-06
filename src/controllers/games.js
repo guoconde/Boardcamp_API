@@ -1,18 +1,39 @@
 import connection from '../db.js'
+import catchError from '../error/catchError.js'
 
 export async function allGames(req, res) {
 
+    let { name } = req.query
+
+    console.log(req.query)
+    console.log(name)
+
+    let arrGames
+
     try {
 
-        const { rows: arrGames } = await connection.query(`
-            SELECT * FROM games
-        `)
+        if (name) {
 
-        res.send(arrGames)
+            arrGames = await connection.query(`
+                SELECT games.*, categories.name AS "categoryName"
+                  FROM games 
+                  JOIN categories ON categories.id=games."categoryId"
+                  WHERE LOWER(games.name) LIKE LOWER($1)
+            `, [`${name}%`])
+
+        } else {
+
+            arrGames = await connection.query(`
+            SELECT games.*, categories.name as "categoryName" FROM games 
+            JOIN categories ON games."categoryId"=categories.id
+            `)
+
+        }
+
+        res.send(arrGames.rows)
 
     } catch (error) {
-        console.error(error)
-        res.sendStatus(500)
+        catchError(res, error)
     }
 }
 
@@ -31,7 +52,7 @@ export async function newGame(req, res) {
             SELECT * FROM categories WHERE id = ( $1 )
         `, [categoryId])
 
-        if(category.length === 0) return res.sendStatus(400)
+        if (category.length === 0) return res.sendStatus(400)
         if (game.length > 0) return res.sendStatus(409)
 
         await connection.query(`
@@ -41,7 +62,6 @@ export async function newGame(req, res) {
         res.sendStatus(201)
 
     } catch (error) {
-        console.error(error)
-        res.sendStatus(500)
+        catchError(res, error)
     }
 }
