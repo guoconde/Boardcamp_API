@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { allRentals, deleteRental, newRental, returnRental } from "../controllers/rentals.js"
+import { allMetrics, allRentals, deleteRental, newRental, returnRental } from "../controllers/rentals.js"
 import validateMiddleware from "../middlewares/validateMiddleware.js"
 import rentalsSchema from "../schemas/rentalsSchema.js"
 
@@ -9,5 +9,6 @@ rentalsRouter.get('/rentals', allRentals)
 rentalsRouter.post('/rentals', validateMiddleware(rentalsSchema), newRental)
 rentalsRouter.post('/rentals/:id/return', returnRental)
 rentalsRouter.delete('/rentals/:id', deleteRental)
+rentalsRouter.get('/rentals/metrics', allMetrics)
 
 export default rentalsRouter

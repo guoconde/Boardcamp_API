@@ -17,7 +17,17 @@ function utilRental(list, arrCustomers, arrGames) {
     )
 }
 
+function utilSum(list, arrCustomers, arrGames) {
+    return list.map(rental => ({
+        revenue: parseInt(rental.originalSum + rental.delaySum),
+        rentals: parseInt(rental.rentals),
+        average: Math.round((rental.originalSum + rental.delaySum) / rental.rentals)
+    })
+    )
+}
+
 export {
     utilCustomer,
     utilRental,
+    utilSum
 }

@@ -1,7 +1,7 @@
 import connection from "../db.js"
 import dayjs from "dayjs"
 import catchError from "../error/catchError.js"
-import { utilRental } from "../utils/utilMap.js"
+import { utilRental, utilSum } from "../utils/utilMap.js"
 import calculator from "../utils/calculator.js"
 import sqlstring from "sqlstring"
 import { offsetLimit, setLimit, setOffset } from "../utils/offsetLimit.js"
@@ -162,6 +162,38 @@ export async function deleteRental(req, res) {
         `, [id])
 
         res.sendStatus(200)
+
+    } catch (error) {
+        catchError(res, error)
+    }
+}
+
+export async function allMetrics(req, res) {
+    const { startDate, endDate } = req.query
+
+    let filter = ''
+
+    if (startDate && endDate) {
+        filter = `WHERE "rentDate" >= ${sqlstring.escape(startDate)} AND "rentDate" <= ${sqlstring.escape(endDate)}` 
+    } else if (startDate) {
+        filter = `WHERE "rentDate" >= ${sqlstring.escape(startDate)}` 
+    } else if (endDate) {
+        filter = `WHERE "rentDate" <= ${sqlstring.escape(startDate)}` 
+    }
+
+    try {
+        
+        let { rows: sumRentals } = await connection.query(`
+            SELECT SUM("originalPrice") AS "originalSum",
+                SUM("delayFee") AS "delaySum",
+                COUNT(id) AS rentals
+                FROM rentals
+                ${filter}
+        `)
+
+        sumRentals = utilSum(sumRentals)
+        
+        res.send(sumRentals[0])
 
     } catch (error) {
         catchError(res, error)
