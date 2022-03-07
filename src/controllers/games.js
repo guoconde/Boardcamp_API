@@ -2,35 +2,30 @@ import connection from '../db.js'
 import catchError from '../error/catchError.js'
 
 export async function allGames(req, res) {
-
     let { name } = req.query
-
-    console.log(req.query)
-    console.log(name)
-
-    let arrGames
 
     try {
 
         if (name) {
 
-            arrGames = await connection.query(`
+            const { rows: arrGames } = await connection.query(`
                 SELECT games.*, categories.name AS "categoryName"
                   FROM games 
                   JOIN categories ON categories.id=games."categoryId"
                   WHERE LOWER(games.name) LIKE LOWER($1)
             `, [`${name}%`])
 
+            res.send(arrGames)
+
         } else {
 
-            arrGames = await connection.query(`
+            const { rows: arrGames } = await connection.query(`
             SELECT games.*, categories.name as "categoryName" FROM games 
             JOIN categories ON games."categoryId"=categories.id
             `)
 
+            res.send(arrGames)
         }
-
-        res.send(arrGames.rows)
 
     } catch (error) {
         catchError(res, error)
