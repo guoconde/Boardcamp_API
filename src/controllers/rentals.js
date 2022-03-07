@@ -2,6 +2,7 @@ import connection from "../db.js"
 import dayjs from "dayjs"
 import catchError from "../error/catchError.js"
 import { utilRental } from "../utils/utilMap.js"
+import calculator from "../utils/calculator.js"
 
 export async function allRentals(req, res) {
 
@@ -78,6 +79,36 @@ export async function newRental(req, res) {
         `, [customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee])
 
         res.sendStatus(201)
+
+    } catch (error) {
+        catchError(res, error)
+    }
+}
+
+export async function returnGame(req, res) {
+    const { id } = req.params;
+
+    const returnDate = dayjs().format('YYYY-MM-DD')
+
+    try {
+
+        const { rows: rentals } = await connection.query(`
+            SELECT * FROM rentals WHERE id = $1
+        `, [id]);
+
+        if (rentals.length === 0) return res.sendStatus(404)
+
+        if (rentals[0].returnDate !== null) return res.sendStatus(400)
+
+        const delayFee = calculator(rentals[0].rentDate, rentals[0].daysRented, rentals[0].originalPrice)
+
+        await connection.query(`
+            UPDATE rentals
+            SET "returnDate" = $1, "delayFee" = $2
+            WHERE id = $3
+        `, [returnDate, delayFee, id]);
+
+        res.sendStatus(200);
 
     } catch (error) {
         catchError(res, error)
