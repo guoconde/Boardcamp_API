@@ -1,6 +1,6 @@
 import connection from "../db.js"
 import catchError from "../error/catchError.js"
-import utilMap from "../utils/utilMap.js";
+import { utilCustomer } from "../utils/utilMap.js";
 
 export async function allCustomers(req, res) {
 
@@ -9,20 +9,20 @@ export async function allCustomers(req, res) {
     try {
 
         if (cpf) {
-            const cpfCustomersList = await connection.query(`
+            let arrCustomers = await connection.query(`
                 SELECT * FROM customers WHERE cpf LIKE $1
             `, [`${cpf}%`]);
 
-            const arrCustomers = utilMap(cpfCustomersList)
+            arrCustomers = utilCustomer(arrCustomers)
 
             res.send(arrCustomers)
         }
 
-        const allCustomers = await connection.query(`
+        let arrCustomers = await connection.query(`
             SELECT * FROM customers
         `)
 
-        const arrCustomers = utilMap(allCustomers)
+        arrCustomers = utilCustomer(arrCustomers)
 
         res.send(arrCustomers)
 
@@ -59,15 +59,15 @@ export async function selectedCustomer(req, res) {
 
     try {
 
-        const customerById = await connection.query(`
+        let customerById = await connection.query(`
             SELECT * FROM customers WHERE id = ( $1 )
         `, [id])
 
         if (customerById.rows.length === 0) return res.sendStatus(404)
 
-        const selectedById = utilMap(customerById)
+        customerById = utilCustomer(customerById)
 
-        res.send(selectedById[0])
+        res.send(customerById[0])
 
     } catch (error) {
         catchError(res, error)

@@ -1,10 +1,23 @@
 import dayjs from "dayjs"
 
-export default function utilMap(list) {
-    return list.rows.map(customer => {
-        return (customer = {
-            ...customer,
-            birthday: dayjs(customer.birthday).format('YYYY-MM-DD'),
-        })
+function utilCustomer(list) {
+    return list.rows.map(customer => ({
+        ...customer,
+        birthday: dayjs(customer.birthday).format('YYYY-MM-DD'),
     })
+    )
+}
+
+function utilRental(list, arrCustomers, arrGames) {
+    return list.map(rental => ({
+        ...rental,
+        customer: arrCustomers.find(customer => customer.id === rental.customerId),
+        game: arrGames.find(game => game.id === rental.gameId)
+    })
+    )
+}
+
+export {
+    utilCustomer,
+    utilRental,
 }
