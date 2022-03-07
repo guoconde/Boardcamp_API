@@ -15,8 +15,3 @@ export {
     sortItems,
     setOrder
 }
-
-    //     order && (setOrder = `ORDER BY ${sqlstring.escape(orderByFilters[order])}`);
-    //     (desc === 'true' && order) && (setOrder = `
-    //     ORDER BY ${sqlstring.escape(orderByFilters[order])} DESC
-    // `);
