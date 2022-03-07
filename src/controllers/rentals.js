@@ -89,7 +89,7 @@ export async function newRental(req, res) {
     }
 }
 
-export async function returnGame(req, res) {
+export async function returnRental(req, res) {
     const { id } = req.params
 
     const returnDate = dayjs().format('YYYY-MM-DD')
@@ -111,6 +111,30 @@ export async function returnGame(req, res) {
             SET "returnDate" = $1, "delayFee" = $2
             WHERE id = $3
         `, [returnDate, delayFee, id])
+
+        res.sendStatus(200)
+
+    } catch (error) {
+        catchError(res, error)
+    }
+}
+
+export async function deleteRental(req, res) {
+    const { id } = req.params
+
+    try {
+
+        const { rows: rentals } = await connection.query(`
+            SELECT * FROM rentals WHERE id = ( $1 )
+        `, [id])
+
+        if (rentals.length === 0) return res.sendStatus(404)
+
+        if (rentals[0].returnDate !== null) return res.sendStatus(400)
+
+        await connection.query(`
+            DELETE FROM rentals WHERE id = ( $1 )
+        `, [id])
 
         res.sendStatus(200)
 
