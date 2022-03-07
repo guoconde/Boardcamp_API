@@ -36,11 +36,11 @@ export async function allRentals(req, res) {
                 JOIN categories ON games."categoryId" = categories.id
         `)
 
-        const { rows: arrCustomers } = await connection.query(`SELECT id, name FROM customers`);
+        const { rows: arrCustomers } = await connection.query(`SELECT id, name FROM customers`)
 
         arrRentals = utilRental(arrRentals, arrCustomers, arrGames)
 
-        res.send(arrRentals);
+        res.send(arrRentals)
 
     } catch (error) {
         catchError(res, error)
@@ -57,14 +57,18 @@ export async function newRental(req, res) {
     try {
 
         const { rows: qtdStock } = await connection.query(`
-            SELECT * FROM rentals WHERE "gameId" = ( $1 )  
+            SELECT "delayFee" FROM rentals WHERE "gameId" = ( $1 )  
         `, [gameId])
+        
+        let rentCount = 0
+
+        qtdStock.filter(el => el.delayFee === null && rentCount++)
 
         const { rows: game } = await connection.query(`
             SELECT * FROM games WHERE id = ( $1 )
         `, [gameId])
 
-        if (qtdStock.length >= game[0].stockTotal) return res.sendStatus(400)
+        if (rentCount >= game[0].stockTotal) return res.sendStatus(400)
 
         const originalPrice = game[0].pricePerDay * daysRented
 
@@ -86,7 +90,7 @@ export async function newRental(req, res) {
 }
 
 export async function returnGame(req, res) {
-    const { id } = req.params;
+    const { id } = req.params
 
     const returnDate = dayjs().format('YYYY-MM-DD')
 
@@ -94,7 +98,7 @@ export async function returnGame(req, res) {
 
         const { rows: rentals } = await connection.query(`
             SELECT * FROM rentals WHERE id = $1
-        `, [id]);
+        `, [id])
 
         if (rentals.length === 0) return res.sendStatus(404)
 
@@ -106,9 +110,9 @@ export async function returnGame(req, res) {
             UPDATE rentals
             SET "returnDate" = $1, "delayFee" = $2
             WHERE id = $3
-        `, [returnDate, delayFee, id]);
+        `, [returnDate, delayFee, id])
 
-        res.sendStatus(200);
+        res.sendStatus(200)
 
     } catch (error) {
         catchError(res, error)

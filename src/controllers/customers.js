@@ -1,17 +1,17 @@
 import connection from "../db.js"
 import catchError from "../error/catchError.js"
-import { utilCustomer } from "../utils/utilMap.js";
+import { utilCustomer } from "../utils/utilMap.js"
 
 export async function allCustomers(req, res) {
 
-    const { cpf } = req.query;
+    const { cpf } = req.query
 
     try {
 
         if (cpf) {
             let arrCustomers = await connection.query(`
                 SELECT * FROM customers WHERE cpf LIKE $1
-            `, [`${cpf}%`]);
+            `, [`${cpf}%`])
 
             arrCustomers = utilCustomer(arrCustomers)
 
@@ -82,11 +82,11 @@ export async function updateCustomer(req, res) {
 
         const { rows: customer } = await connection.query(`
             SELECT * FROM customers WHERE id=$1
-        `, [id]);
+        `, [id])
 
         const { rows: cpfCustomer } = await connection.query(`
             SELECT id FROM customers WHERE cpf=$1
-        `,[cpf]);
+        `,[cpf])
 
         if (cpfCustomer.length > 0 && cpf !== customer[0].cpf) {
             return res.sendStatus(409)
@@ -96,9 +96,9 @@ export async function updateCustomer(req, res) {
             UPDATE customers
             SET name = $1, cpf = $2, phone = $3, birthday = $4 
             WHERE id=$5
-        `, [name, cpf, phone, birthday, id]);
+        `, [name, cpf, phone, birthday, id])
 
-        res.sendStatus(200);
+        res.sendStatus(200)
 
     } catch (error) {
         catchError(res, error)
