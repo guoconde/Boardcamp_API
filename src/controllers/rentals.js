@@ -3,28 +3,29 @@ import dayjs from "dayjs"
 import catchError from "../error/catchError.js"
 import { utilRental } from "../utils/utilMap.js"
 import calculator from "../utils/calculator.js"
+import sqlstring from "sqlstring"
+import { offsetLimit, setLimit, setOffset } from "../utils/offsetLimit.js"
 
 export async function allRentals(req, res) {
 
-    let { customerId, gameId } = req.query
+    let { customerId, gameId, limit, offset } = req.query
 
     let filter = ''
+    
+    offsetLimit(limit, offset)
 
     try {
 
-        if (customerId) {
-            filter = `WHERE rentals."customerId" = ${customerId}`
-        }
+        if (customerId) filter = `WHERE rentals."customerId" = ${sqlstring.escape(customerId)}`
 
-        if (gameId) {
-            filter = `WHERE rentals."gameId" = ${gameId}`
-        }
+        if (gameId) filter = `WHERE rentals."gameId" = ${sqlstring.escape(gameId)}`
 
         let { rows: arrRentals } = await connection.query(`
-            SELECT * FROM rentals ${filter}
+            SELECT * FROM rentals 
+                ${filter}
+                ${setOffset}
+                ${setLimit}
         `)
-
-
 
         const { rows: arrGames } = await connection.query(`
             SELECT 

@@ -1,8 +1,11 @@
 import connection from '../db.js'
 import catchError from '../error/catchError.js'
+import { offsetLimit, setLimit, setOffset } from '../utils/offsetLimit.js'
 
 export async function allGames(req, res) {
-    let { name } = req.query
+    let { name, offset, limit } = req.query
+
+    offsetLimit(offset, limit)
 
     try {
 
@@ -10,9 +13,12 @@ export async function allGames(req, res) {
 
             const { rows: arrGames } = await connection.query(`
                 SELECT games.*, categories.name AS "categoryName"
-                  FROM games 
-                  JOIN categories ON categories.id=games."categoryId"
-                  WHERE LOWER(games.name) LIKE LOWER($1)
+                FROM games 
+                JOIN categories ON categories.id=games."categoryId"
+                WHERE LOWER(games.name) LIKE LOWER($1)
+                    ${setOffset}
+                    ${setLimit}
+
             `, [`${name}%`])
 
             res.send(arrGames)
@@ -20,8 +26,10 @@ export async function allGames(req, res) {
         } else {
 
             const { rows: arrGames } = await connection.query(`
-            SELECT games.*, categories.name as "categoryName" FROM games 
-            JOIN categories ON games."categoryId"=categories.id
+                SELECT games.*, categories.name as "categoryName" FROM games 
+                JOIN categories ON games."categoryId"=categories.id
+                    ${setOffset}
+                    ${setLimit}
             `)
 
             res.send(arrGames)

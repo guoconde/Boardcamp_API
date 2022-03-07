@@ -1,10 +1,13 @@
 import connection from "../db.js"
 import catchError from "../error/catchError.js"
+import { offsetLimit, setLimit, setOffset } from "../utils/offsetLimit.js"
 import { utilCustomer } from "../utils/utilMap.js"
 
 export async function allCustomers(req, res) {
 
-    const { cpf } = req.query
+    const { cpf, limit, offset } = req.query
+
+    offsetLimit(offset, limit)
 
     try {
 
@@ -20,6 +23,8 @@ export async function allCustomers(req, res) {
 
         let arrCustomers = await connection.query(`
             SELECT * FROM customers
+                ${setOffset}
+                ${setLimit}
         `)
 
         arrCustomers = utilCustomer(arrCustomers)

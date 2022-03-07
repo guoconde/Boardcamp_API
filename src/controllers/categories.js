@@ -1,12 +1,19 @@
 import connection from '../db.js'
 import catchError from '../error/catchError.js'
+import { offsetLimit, setLimit, setOffset } from '../utils/offsetLimit.js'
 
 export async function allCategories(req, res) {
+
+    const { limit, offset } = req.query
+
+    offsetLimit(offset, limit)
 
     try {
 
         const { rows: arrCategories } = await connection.query(`
             SELECT * FROM categories
+                ${setOffset}
+                ${setLimit}
         `)
 
         res.send(arrCategories)
