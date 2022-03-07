@@ -9,7 +9,7 @@ import { setOrder, sortItems } from "../utils/order.js"
 
 export async function allRentals(req, res) {
 
-    let { customerId, gameId, limit, offset, desc, order } = req.query
+    let { customerId, gameId, limit, offset, desc, order, status, startDate } = req.query
 
     let filter = ''
 
@@ -28,11 +28,20 @@ export async function allRentals(req, res) {
 
     sortItems(order, desc, sortByFilters)
 
+    if (customerId) filter = `WHERE rentals."customerId" = ${sqlstring.escape(customerId)}`
+    if (gameId) filter = `WHERE rentals."gameId" = ${sqlstring.escape(gameId)}`
+
+    if (status === 'open' || status === 'closed') {
+        filter.includes('WHERE') ? filter = filter + ' AND' : filter = 'WHERE';
+        status === 'open' ? filter = filter + ` "returnDate" is null` : filter = filter + ` "returnDate" is not null`
+    }
+
+    if (startDate) {
+        filter.includes('WHERE') ? filter = filter + ' AND' : filter = 'WHERE'
+        filter = filter + ` "rentDate" >= ${sqlstring.escape(startDate)}`
+    }
+
     try {
-
-        if (customerId) filter = `WHERE rentals."customerId" = ${sqlstring.escape(customerId)}`
-
-        if (gameId) filter = `WHERE rentals."gameId" = ${sqlstring.escape(gameId)}`
 
         let { rows: arrRentals } = await connection.query(`
             SELECT * FROM rentals 
