@@ -5,14 +5,28 @@ import { utilRental } from "../utils/utilMap.js"
 import calculator from "../utils/calculator.js"
 import sqlstring from "sqlstring"
 import { offsetLimit, setLimit, setOffset } from "../utils/offsetLimit.js"
+import { setOrder, sortItems } from "../utils/order.js"
 
 export async function allRentals(req, res) {
 
-    let { customerId, gameId, limit, offset } = req.query
+    let { customerId, gameId, limit, offset, desc, order } = req.query
 
     let filter = ''
-    
+
     offsetLimit(limit, offset)
+
+    const sortByFilters = {
+        id: 1,
+        customerId: 2,
+        gameId: 3,
+        rentDate: 4,
+        daysRented: 5,
+        returnDate: 6,
+        originalPrice: 7,
+        delayFee: 8
+    }
+
+    sortItems(order, desc, sortByFilters)
 
     try {
 
@@ -25,6 +39,7 @@ export async function allRentals(req, res) {
                 ${filter}
                 ${setOffset}
                 ${setLimit}
+                ${setOrder}
         `)
 
         const { rows: arrGames } = await connection.query(`
@@ -60,7 +75,7 @@ export async function newRental(req, res) {
         const { rows: qtdStock } = await connection.query(`
             SELECT "delayFee" FROM rentals WHERE "gameId" = ( $1 )  
         `, [gameId])
-        
+
         let rentCount = 0
 
         qtdStock.filter(el => el.delayFee === null && rentCount++)

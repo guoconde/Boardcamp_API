@@ -1,13 +1,25 @@
 import connection from "../db.js"
 import catchError from "../error/catchError.js"
 import { offsetLimit, setLimit, setOffset } from "../utils/offsetLimit.js"
+import { setOrder, sortItems } from "../utils/order.js"
 import { utilCustomer } from "../utils/utilMap.js"
 
 export async function allCustomers(req, res) {
 
-    const { cpf, limit, offset } = req.query
+    const { cpf, limit, offset, order, desc } = req.query
 
     offsetLimit(offset, limit)
+
+    const sortByFilters = {
+        id: 1,
+        name: 2,
+        phone: 3,
+        cpf: 4,
+        birthday: 5,
+        rentalsCount: 6
+    }
+
+    sortItems(order, desc, sortByFilters)
 
     try {
 
@@ -25,6 +37,7 @@ export async function allCustomers(req, res) {
             SELECT * FROM customers
                 ${setOffset}
                 ${setLimit}
+                ${setOrder}
         `)
 
         arrCustomers = utilCustomer(arrCustomers)
@@ -91,7 +104,7 @@ export async function updateCustomer(req, res) {
 
         const { rows: cpfCustomer } = await connection.query(`
             SELECT id FROM customers WHERE cpf=$1
-        `,[cpf])
+        `, [cpf])
 
         if (cpfCustomer.length > 0 && cpf !== customer[0].cpf) {
             return res.sendStatus(409)

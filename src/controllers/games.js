@@ -1,11 +1,25 @@
 import connection from '../db.js'
 import catchError from '../error/catchError.js'
 import { offsetLimit, setLimit, setOffset } from '../utils/offsetLimit.js'
+import { setOrder, sortItems } from '../utils/order.js'
 
 export async function allGames(req, res) {
-    let { name, offset, limit } = req.query
+    let { name, offset, limit, order, desc } = req.query
 
     offsetLimit(offset, limit)
+
+    const sortByFilters = {
+        id: 1,
+        name: 2,
+        image: 3,
+        stockTotal: 4,
+        categoryId: 5,
+        pricePerDay: 6,
+        categoryName: 7,
+        rentalsCount: 8
+    }
+
+    sortItems(order, desc, sortByFilters)
 
     try {
 
@@ -18,6 +32,7 @@ export async function allGames(req, res) {
                 WHERE LOWER(games.name) LIKE LOWER($1)
                     ${setOffset}
                     ${setLimit}
+                    ${setOrder}
 
             `, [`${name}%`])
 
@@ -30,6 +45,7 @@ export async function allGames(req, res) {
                 JOIN categories ON games."categoryId"=categories.id
                     ${setOffset}
                     ${setLimit}
+                    ${setOrder}
             `)
 
             res.send(arrGames)
